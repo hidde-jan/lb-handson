@@ -32,6 +32,7 @@ App = {
       web3.eth.getAccounts(function(error, accounts) {
           if (error) {
               alert(error);
+              return;
           }
 
           $("#your-address").html(accounts[0]);
@@ -53,6 +54,7 @@ App = {
 
     $(document).on('click', '.btn-issue', App.handleIssue);
     $(document).on('click', '.btn-validate', App.handleValidate);
+    $(document).on('click', '.btn-revoke', App.handleRevoke);
 
     return App.finalize();
   },
@@ -66,8 +68,42 @@ App = {
         obj[input.name] = input.value;
     });
 
-    pre.data("json", obj);
+    // pre.data("json", obj);
     pre.html(JSON.stringify(obj, null, 2));
+  },
+
+  handleRevoke: function(event) {
+      event.preventDefault();
+      var btn = $(event.target);
+      var pre = btn.prev();
+      var address = pre.data("address");
+      var hash = pre.data("hash");
+
+      console.info("revoking (" + address + ", " + hash + ")");
+
+      var storageInstance;
+
+      web3.eth.getAccounts(function(error, accounts) {
+          if (error) {
+              console.log(error);
+          }
+
+          var account = accounts[0];
+
+          App.contracts.HashStorage.deployed().then(function(instance) {
+              storageInstance = instance;
+
+              // Execute adopt as a transaction by sending account
+              return storageInstance.revoke(address, hash, {from: account});
+          }).then(function(result) {
+              console.log("Revoked!");
+              btn.remove();
+              pre.css("text-decoration", "line-through");
+              return true;
+          }).catch(function(err) {
+              console.log(err.message);
+          });
+      });
   },
 
   handleValidate: function(event) {
@@ -131,7 +167,7 @@ App = {
   handleIssue: function(event) {
       event.preventDefault();
 
-      var obj = $("#json-preview").data("json");
+      var obj = JSON.parse($("#json-preview").html());
       console.info(obj);
 
       obj.contract = App.contractAddress;
@@ -154,9 +190,15 @@ App = {
               return storageInstance.add(address, hash, {from: account});
           }).then(function(result) {
               console.log("Issued!");
-              var pre = $("#issued");
+              var issued = $("#issued");
+              var pre = $("<pre></pre>");
+              var btn = $("<button type=\"button\" class=\"btn btn-default  btn-revoke\">Revoke :(</btn>");
               obj.hash = hash;
               pre.html(JSON.stringify(obj, null, 2));
+              pre.data("hash", obj.hash);
+              pre.data("address", obj.address);
+              issued.append(pre);
+              issued.append(btn);
               return true;
           }).catch(function(err) {
               console.log(err.message);
