@@ -52,17 +52,12 @@ App = {
     form.on('change', ':input', App.getFormValues);
 
     $(document).on('click', '.btn-issue', App.handleIssue);
+    $(document).on('click', '.btn-validate', App.handleValidate);
 
     return App.finalize();
   },
 
   finalize: function () {
-  },
-
-  markAdopted: function(adopters, account) {
-    /*
-     * Replace me...
-     */
   },
 
   getFormValues: function(event) {
@@ -73,6 +68,64 @@ App = {
 
     pre.data("json", obj);
     pre.html(JSON.stringify(obj, null, 2));
+  },
+
+  handleValidate: function(event) {
+      event.preventDefault();
+      var t = $("#cert-receipt-json");
+      var o = $("#validation-output");
+
+      // Empty validation field
+      o.html("");
+
+      try {
+          var obj = JSON.parse(t.val());
+      } catch (e) {
+          alert("Couldn't parse Certificate!");
+          return;
+      }
+
+      // Valid format
+      o.append("<li>✔ Valid format</li>");
+      // Check hash
+      var hash = obj.hash;
+      delete obj.hash;
+      var checkhash = objectHash(obj);
+
+      if (hash == checkhash) {
+          o.append("<li>✔ Hash is valid</li>");
+          o.append("<li>Checking blockchain...</li>");
+      } else {
+          o.append("<li>✘ Hash is invalid!</li>");
+          return;
+      }
+
+      var storageInstance;
+
+      web3.eth.getAccounts(function(error, accounts) {
+          if (error) {
+              console.log(error);
+          }
+
+          var account = accounts[0];
+
+          App.contracts.HashStorage.deployed().then(function(instance) {
+              storageInstance = instance;
+
+              // Execute adopt as a transaction by sending account
+              return storageInstance.verify.call(obj.address, hash, {from: account});
+          }).then(function(result) {
+              console.log("Checked!");
+
+              if (result) {
+                  o.append("<li>✔ Exists on blockchain: valid certificate!</li>");
+              } else {
+                  o.append("<li>✘ Can't find it on the blockchain: invalid!</li>");
+              }
+          }).catch(function(err) {
+              console.log(err.message);
+          });
+      });
   },
 
   handleIssue: function(event) {
@@ -104,7 +157,7 @@ App = {
               var pre = $("#issued");
               obj.hash = hash;
               pre.html(JSON.stringify(obj, null, 2));
-              return App.markAdopted();
+              return true;
           }).catch(function(err) {
               console.log(err.message);
           });

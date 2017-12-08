@@ -98,7 +98,7 @@
                     </form>
                 </div>
                 <div class="col-md-6">
-                    <h4>JSON output</h4>
+                    <h4>Certificate receipt output</h4>
 
                     <pre id="json-preview">
                     </pre>
@@ -111,8 +111,35 @@
                 </div>
             </div>
 
-            <div id="petsRow" class="row">
-                <!-- PETS LOAD HERE -->
+            <div class="row">
+                <hr />
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <h4>Certificate receipt</h4>
+
+                    <form id="cert-receipt" class="form-horizontal">
+                        <fieldset>
+                            <div class="component">
+                                <div class="form-group">
+                                    <label class="col-md-2 control-label" for="cert-receipt-json">Certificate</label> 
+                                    <div class="col-md-8">
+                                        <textarea class="form-control" id="cert-receipt-json" rows="12"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </fieldset>
+                    </form>
+
+                    <button class="btn btn-default btn-validate" type="button" data-id="0">Validate!</button>
+                    <br />
+                    <br />
+                    <br />
+                </div>
+                <div class="col-md-6">
+                    <ul id="validation-output"></ul>
+                </div>
             </div>
         </div>
 
