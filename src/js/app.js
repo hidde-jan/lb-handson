@@ -101,6 +101,7 @@ App = {
               pre.css("text-decoration", "line-through");
               return true;
           }).catch(function(err) {
+              alert("Couldn't revoke, probably not enough gas!");
               console.log(err.message);
           });
       });
@@ -132,7 +133,7 @@ App = {
           o.append("<li>✔ Hash is valid</li>");
           o.append("<li>Checking blockchain...</li>");
       } else {
-          o.append("<li>✘ Hash is invalid!</li>");
+          o.append("<li>✘ Hash is invalid! " + checkhash + " does not equal " + hash + "</li>");
           return;
       }
 
