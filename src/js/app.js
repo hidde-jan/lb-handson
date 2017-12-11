@@ -125,17 +125,10 @@ App = {
       // Valid format
       o.append("<li>✔ Valid format</li>");
       // Check hash
-      var hash = obj.hash;
-      delete obj.hash;
       var checkhash = objectHash(obj);
 
-      if (hash == checkhash) {
-          o.append("<li>✔ Hash is valid</li>");
-          o.append("<li>Checking blockchain...</li>");
-      } else {
-          o.append("<li>✘ Hash is invalid! " + checkhash + " does not equal " + hash + "</li>");
-          return;
-      }
+      o.append("<li>Hash: " + checkhash + "</li>");
+      o.append("<li>Checking blockchain...</li>");
 
       var storageInstance;
 
@@ -150,7 +143,7 @@ App = {
               storageInstance = instance;
 
               // Execute adopt as a transaction by sending account
-              return storageInstance.verify.call(obj.address, hash, {from: account});
+              return storageInstance.verify.call(obj.address, checkhash, {from: account});
           }).then(function(result) {
               console.log("Checked!");
 
@@ -172,6 +165,9 @@ App = {
       console.info(obj);
 
       obj.contract = App.contractAddress;
+      var now = new Date();
+      obj['issued-at'] = now.toISOString();
+      obj['issuer'] = 'Hogwarts School of Witchcraft and Wizardry';
       var hash = objectHash(obj);
       var address = obj.address;
 
@@ -192,16 +188,18 @@ App = {
           }).then(function(result) {
               console.log("Issued!");
               var issued = $("#issued");
+              var hashpre = $("<pre>hash: " + hash + "</pre>");
               var pre = $("<pre></pre>");
               var btn = $("<button type=\"button\" class=\"btn btn-default  btn-revoke\">Revoke :(</btn>");
-              obj.hash = hash;
               pre.html(JSON.stringify(obj, null, 2));
               pre.data("hash", obj.hash);
               pre.data("address", obj.address);
+              issued.append(hashpre);
               issued.append(pre);
               issued.append(btn);
               return true;
           }).catch(function(err) {
+              alert("Could not issue certificate");
               console.log(err.message);
           });
       });
