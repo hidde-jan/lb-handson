@@ -192,8 +192,8 @@ App = {
               var pre = $("<pre></pre>");
               var btn = $("<button type=\"button\" class=\"btn btn-default  btn-revoke\">Revoke :(</btn>");
               pre.html(JSON.stringify(obj, null, 2));
-              pre.data("hash", obj.hash);
-              pre.data("address", obj.address);
+              pre.data("hash", hash);
+              pre.data("address", address);
               issued.append(hashpre);
               issued.append(pre);
               issued.append(btn);
